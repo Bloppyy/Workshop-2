@@ -5,7 +5,7 @@
 -- Dumped from database version 15.4
 -- Dumped by pg_dump version 15.4
 
--- Started on 2025-11-02 15:53:14
+-- Started on 2025-11-09 16:32:20
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -18,29 +18,77 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
---
--- TOC entry 3473 (class 1262 OID 32778)
--- Name: IPetro; Type: DATABASE; Schema: -; Owner: postgres
---
-
-CREATE DATABASE "IPetro" WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc LOCALE = 'English_United States.1256';
-
-
-ALTER DATABASE "IPetro" OWNER TO postgres;
-
-\connect "IPetro"
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
-
+ALTER TABLE IF EXISTS ONLY public.templates DROP CONSTRAINT IF EXISTS templates_created_by_fkey;
+ALTER TABLE IF EXISTS ONLY public.reviews DROP CONSTRAINT IF EXISTS reviews_reviewer_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.reviews DROP CONSTRAINT IF EXISTS reviews_inspection_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.reports DROP CONSTRAINT IF EXISTS reports_template_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.reports DROP CONSTRAINT IF EXISTS reports_inspection_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.reports DROP CONSTRAINT IF EXISTS reports_generated_by_fkey;
+ALTER TABLE IF EXISTS ONLY public.presets DROP CONSTRAINT IF EXISTS presets_created_by_fkey;
+ALTER TABLE IF EXISTS ONLY public.photos DROP CONSTRAINT IF EXISTS photos_uploaded_by_fkey;
+ALTER TABLE IF EXISTS ONLY public.photos DROP CONSTRAINT IF EXISTS photos_inspection_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.observations DROP CONSTRAINT IF EXISTS observations_photo_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.observations DROP CONSTRAINT IF EXISTS observations_inspection_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.observations DROP CONSTRAINT IF EXISTS observations_created_by_fkey;
+ALTER TABLE IF EXISTS ONLY public.inspections DROP CONSTRAINT IF EXISTS inspections_vessel_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.inspections DROP CONSTRAINT IF EXISTS inspections_reviewer_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.inspections DROP CONSTRAINT IF EXISTS inspections_inspector_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.activity_logs DROP CONSTRAINT IF EXISTS activity_logs_user_id_fkey;
+DROP TRIGGER IF EXISTS update_vessel_modtime ON public.vessels;
+DROP TRIGGER IF EXISTS update_user_modtime ON public.users;
+DROP TRIGGER IF EXISTS update_observation_modtime ON public.observations;
+DROP TRIGGER IF EXISTS update_inspection_modtime ON public.inspections;
+DROP INDEX IF EXISTS public.idx_users_username;
+DROP INDEX IF EXISTS public.idx_reviews_inspection_id;
+DROP INDEX IF EXISTS public.idx_reports_inspection_id;
+DROP INDEX IF EXISTS public.idx_photos_inspection_id;
+DROP INDEX IF EXISTS public.idx_observations_inspection_id;
+DROP INDEX IF EXISTS public.idx_inspections_vessel_id;
+DROP INDEX IF EXISTS public.idx_inspections_status;
+ALTER TABLE IF EXISTS ONLY public.vessels DROP CONSTRAINT IF EXISTS vessels_tag_no_key;
+ALTER TABLE IF EXISTS ONLY public.vessels DROP CONSTRAINT IF EXISTS vessels_pkey;
+ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_username_key;
+ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_pkey;
+ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_email_key;
+ALTER TABLE IF EXISTS ONLY public.templates DROP CONSTRAINT IF EXISTS templates_pkey;
+ALTER TABLE IF EXISTS ONLY public.reviews DROP CONSTRAINT IF EXISTS reviews_pkey;
+ALTER TABLE IF EXISTS ONLY public.reports DROP CONSTRAINT IF EXISTS reports_pkey;
+ALTER TABLE IF EXISTS ONLY public.presets DROP CONSTRAINT IF EXISTS presets_pkey;
+ALTER TABLE IF EXISTS ONLY public.photos DROP CONSTRAINT IF EXISTS photos_pkey;
+ALTER TABLE IF EXISTS ONLY public.observations DROP CONSTRAINT IF EXISTS observations_pkey;
+ALTER TABLE IF EXISTS ONLY public.inspections DROP CONSTRAINT IF EXISTS inspections_pkey;
+ALTER TABLE IF EXISTS ONLY public.activity_logs DROP CONSTRAINT IF EXISTS activity_logs_pkey;
+ALTER TABLE IF EXISTS public.vessels ALTER COLUMN vessel_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.users ALTER COLUMN user_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.templates ALTER COLUMN template_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.reviews ALTER COLUMN review_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.reports ALTER COLUMN report_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.presets ALTER COLUMN preset_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.photos ALTER COLUMN photo_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.observations ALTER COLUMN observation_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.inspections ALTER COLUMN inspection_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.activity_logs ALTER COLUMN log_id DROP DEFAULT;
+DROP SEQUENCE IF EXISTS public.vessels_vessel_id_seq;
+DROP TABLE IF EXISTS public.vessels;
+DROP SEQUENCE IF EXISTS public.users_user_id_seq;
+DROP TABLE IF EXISTS public.users;
+DROP SEQUENCE IF EXISTS public.templates_template_id_seq;
+DROP TABLE IF EXISTS public.templates;
+DROP SEQUENCE IF EXISTS public.reviews_review_id_seq;
+DROP TABLE IF EXISTS public.reviews;
+DROP SEQUENCE IF EXISTS public.reports_report_id_seq;
+DROP TABLE IF EXISTS public.reports;
+DROP SEQUENCE IF EXISTS public.presets_preset_id_seq;
+DROP TABLE IF EXISTS public.presets;
+DROP SEQUENCE IF EXISTS public.photos_photo_id_seq;
+DROP TABLE IF EXISTS public.photos;
+DROP SEQUENCE IF EXISTS public.observations_observation_id_seq;
+DROP TABLE IF EXISTS public.observations;
+DROP SEQUENCE IF EXISTS public.inspections_inspection_id_seq;
+DROP TABLE IF EXISTS public.inspections;
+DROP SEQUENCE IF EXISTS public.activity_logs_log_id_seq;
+DROP TABLE IF EXISTS public.activity_logs;
+DROP FUNCTION IF EXISTS public.update_modified_column();
 --
 -- TOC entry 234 (class 1255 OID 32986)
 -- Name: update_modified_column(); Type: FUNCTION; Schema: public; Owner: postgres
@@ -97,7 +145,7 @@ CREATE SEQUENCE public.activity_logs_log_id_seq
 ALTER TABLE public.activity_logs_log_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3474 (class 0 OID 0)
+-- TOC entry 3476 (class 0 OID 0)
 -- Dependencies: 232
 -- Name: activity_logs_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -144,7 +192,7 @@ CREATE SEQUENCE public.inspections_inspection_id_seq
 ALTER TABLE public.inspections_inspection_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3475 (class 0 OID 0)
+-- TOC entry 3477 (class 0 OID 0)
 -- Dependencies: 218
 -- Name: inspections_inspection_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -191,7 +239,7 @@ CREATE SEQUENCE public.observations_observation_id_seq
 ALTER TABLE public.observations_observation_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3476 (class 0 OID 0)
+-- TOC entry 3478 (class 0 OID 0)
 -- Dependencies: 222
 -- Name: observations_observation_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -214,7 +262,8 @@ CREATE TABLE public.photos (
     uploaded_by integer,
     sequence_no integer,
     metadata jsonb,
-    uploaded_at timestamp without time zone DEFAULT now()
+    uploaded_at timestamp without time zone DEFAULT now(),
+    object_key text
 );
 
 
@@ -237,7 +286,7 @@ CREATE SEQUENCE public.photos_photo_id_seq
 ALTER TABLE public.photos_photo_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3477 (class 0 OID 0)
+-- TOC entry 3479 (class 0 OID 0)
 -- Dependencies: 220
 -- Name: photos_photo_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -283,7 +332,7 @@ CREATE SEQUENCE public.presets_preset_id_seq
 ALTER TABLE public.presets_preset_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3478 (class 0 OID 0)
+-- TOC entry 3480 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: presets_preset_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -327,7 +376,7 @@ CREATE SEQUENCE public.reports_report_id_seq
 ALTER TABLE public.reports_report_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3479 (class 0 OID 0)
+-- TOC entry 3481 (class 0 OID 0)
 -- Dependencies: 228
 -- Name: reports_report_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -370,7 +419,7 @@ CREATE SEQUENCE public.reviews_review_id_seq
 ALTER TABLE public.reviews_review_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3480 (class 0 OID 0)
+-- TOC entry 3482 (class 0 OID 0)
 -- Dependencies: 230
 -- Name: reviews_review_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -414,7 +463,7 @@ CREATE SEQUENCE public.templates_template_id_seq
 ALTER TABLE public.templates_template_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3481 (class 0 OID 0)
+-- TOC entry 3483 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: templates_template_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -438,6 +487,7 @@ CREATE TABLE public.users (
     active boolean DEFAULT true,
     created_at timestamp without time zone DEFAULT now(),
     updated_at timestamp without time zone DEFAULT now(),
+    username character varying(50) NOT NULL,
     CONSTRAINT users_role_check CHECK (((role)::text = ANY ((ARRAY['inspector'::character varying, 'reviewer'::character varying, 'admin'::character varying])::text[])))
 );
 
@@ -461,7 +511,7 @@ CREATE SEQUENCE public.users_user_id_seq
 ALTER TABLE public.users_user_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3482 (class 0 OID 0)
+-- TOC entry 3484 (class 0 OID 0)
 -- Dependencies: 214
 -- Name: users_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -505,7 +555,7 @@ CREATE SEQUENCE public.vessels_vessel_id_seq
 ALTER TABLE public.vessels_vessel_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3483 (class 0 OID 0)
+-- TOC entry 3485 (class 0 OID 0)
 -- Dependencies: 216
 -- Name: vessels_vessel_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -594,7 +644,7 @@ ALTER TABLE ONLY public.vessels ALTER COLUMN vessel_id SET DEFAULT nextval('publ
 
 
 --
--- TOC entry 3467 (class 0 OID 32966)
+-- TOC entry 3470 (class 0 OID 32966)
 -- Dependencies: 233
 -- Data for Name: activity_logs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -604,7 +654,7 @@ COPY public.activity_logs (log_id, user_id, action, entity, entity_id, details, 
 
 
 --
--- TOC entry 3453 (class 0 OID 32808)
+-- TOC entry 3456 (class 0 OID 32808)
 -- Dependencies: 219
 -- Data for Name: inspections; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -614,7 +664,7 @@ COPY public.inspections (inspection_id, vessel_id, inspector_id, reviewer_id, st
 
 
 --
--- TOC entry 3457 (class 0 OID 32857)
+-- TOC entry 3460 (class 0 OID 32857)
 -- Dependencies: 223
 -- Data for Name: observations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -624,17 +674,17 @@ COPY public.observations (observation_id, inspection_id, photo_id, component, fi
 
 
 --
--- TOC entry 3455 (class 0 OID 32837)
+-- TOC entry 3458 (class 0 OID 32837)
 -- Dependencies: 221
 -- Data for Name: photos; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.photos (photo_id, inspection_id, file_url, tag_number, component, caption, uploaded_by, sequence_no, metadata, uploaded_at) FROM stdin;
+COPY public.photos (photo_id, inspection_id, file_url, tag_number, component, caption, uploaded_by, sequence_no, metadata, uploaded_at, object_key) FROM stdin;
 \.
 
 
 --
--- TOC entry 3459 (class 0 OID 32884)
+-- TOC entry 3462 (class 0 OID 32884)
 -- Dependencies: 225
 -- Data for Name: presets; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -644,7 +694,7 @@ COPY public.presets (preset_id, category, preset_text, type, placeholders, sever
 
 
 --
--- TOC entry 3463 (class 0 OID 32918)
+-- TOC entry 3466 (class 0 OID 32918)
 -- Dependencies: 229
 -- Data for Name: reports; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -654,7 +704,7 @@ COPY public.reports (report_id, inspection_id, template_id, file_url, generated_
 
 
 --
--- TOC entry 3465 (class 0 OID 32945)
+-- TOC entry 3468 (class 0 OID 32945)
 -- Dependencies: 231
 -- Data for Name: reviews; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -664,7 +714,7 @@ COPY public.reviews (review_id, inspection_id, reviewer_id, comments, status, re
 
 
 --
--- TOC entry 3461 (class 0 OID 32901)
+-- TOC entry 3464 (class 0 OID 32901)
 -- Dependencies: 227
 -- Data for Name: templates; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -674,17 +724,17 @@ COPY public.templates (template_id, name, description, template_html, version, a
 
 
 --
--- TOC entry 3449 (class 0 OID 32780)
+-- TOC entry 3452 (class 0 OID 32780)
 -- Dependencies: 215
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.users (user_id, name, email, password_hash, role, department, certification_id, active, created_at, updated_at) FROM stdin;
+COPY public.users (user_id, name, email, password_hash, role, department, certification_id, active, created_at, updated_at, username) FROM stdin;
 \.
 
 
 --
--- TOC entry 3451 (class 0 OID 32795)
+-- TOC entry 3454 (class 0 OID 32795)
 -- Dependencies: 217
 -- Data for Name: vessels; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -694,7 +744,7 @@ COPY public.vessels (vessel_id, tag_no, description, plant_unit, location, desig
 
 
 --
--- TOC entry 3484 (class 0 OID 0)
+-- TOC entry 3486 (class 0 OID 0)
 -- Dependencies: 232
 -- Name: activity_logs_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -703,7 +753,7 @@ SELECT pg_catalog.setval('public.activity_logs_log_id_seq', 1, false);
 
 
 --
--- TOC entry 3485 (class 0 OID 0)
+-- TOC entry 3487 (class 0 OID 0)
 -- Dependencies: 218
 -- Name: inspections_inspection_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -712,7 +762,7 @@ SELECT pg_catalog.setval('public.inspections_inspection_id_seq', 1, false);
 
 
 --
--- TOC entry 3486 (class 0 OID 0)
+-- TOC entry 3488 (class 0 OID 0)
 -- Dependencies: 222
 -- Name: observations_observation_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -721,7 +771,7 @@ SELECT pg_catalog.setval('public.observations_observation_id_seq', 1, false);
 
 
 --
--- TOC entry 3487 (class 0 OID 0)
+-- TOC entry 3489 (class 0 OID 0)
 -- Dependencies: 220
 -- Name: photos_photo_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -730,7 +780,7 @@ SELECT pg_catalog.setval('public.photos_photo_id_seq', 1, false);
 
 
 --
--- TOC entry 3488 (class 0 OID 0)
+-- TOC entry 3490 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: presets_preset_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -739,7 +789,7 @@ SELECT pg_catalog.setval('public.presets_preset_id_seq', 1, false);
 
 
 --
--- TOC entry 3489 (class 0 OID 0)
+-- TOC entry 3491 (class 0 OID 0)
 -- Dependencies: 228
 -- Name: reports_report_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -748,7 +798,7 @@ SELECT pg_catalog.setval('public.reports_report_id_seq', 1, false);
 
 
 --
--- TOC entry 3490 (class 0 OID 0)
+-- TOC entry 3492 (class 0 OID 0)
 -- Dependencies: 230
 -- Name: reviews_review_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -757,7 +807,7 @@ SELECT pg_catalog.setval('public.reviews_review_id_seq', 1, false);
 
 
 --
--- TOC entry 3491 (class 0 OID 0)
+-- TOC entry 3493 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: templates_template_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -766,7 +816,7 @@ SELECT pg_catalog.setval('public.templates_template_id_seq', 1, false);
 
 
 --
--- TOC entry 3492 (class 0 OID 0)
+-- TOC entry 3494 (class 0 OID 0)
 -- Dependencies: 214
 -- Name: users_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -775,7 +825,7 @@ SELECT pg_catalog.setval('public.users_user_id_seq', 1, false);
 
 
 --
--- TOC entry 3493 (class 0 OID 0)
+-- TOC entry 3495 (class 0 OID 0)
 -- Dependencies: 216
 -- Name: vessels_vessel_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -784,7 +834,7 @@ SELECT pg_catalog.setval('public.vessels_vessel_id_seq', 1, false);
 
 
 --
--- TOC entry 3285 (class 2606 OID 32974)
+-- TOC entry 3288 (class 2606 OID 32974)
 -- Name: activity_logs activity_logs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -793,7 +843,7 @@ ALTER TABLE ONLY public.activity_logs
 
 
 --
--- TOC entry 3267 (class 2606 OID 32820)
+-- TOC entry 3270 (class 2606 OID 32820)
 -- Name: inspections inspections_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -802,7 +852,7 @@ ALTER TABLE ONLY public.inspections
 
 
 --
--- TOC entry 3273 (class 2606 OID 32867)
+-- TOC entry 3276 (class 2606 OID 32867)
 -- Name: observations observations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -811,7 +861,7 @@ ALTER TABLE ONLY public.observations
 
 
 --
--- TOC entry 3270 (class 2606 OID 32845)
+-- TOC entry 3273 (class 2606 OID 32845)
 -- Name: photos photos_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -820,7 +870,7 @@ ALTER TABLE ONLY public.photos
 
 
 --
--- TOC entry 3275 (class 2606 OID 32894)
+-- TOC entry 3278 (class 2606 OID 32894)
 -- Name: presets presets_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -829,7 +879,7 @@ ALTER TABLE ONLY public.presets
 
 
 --
--- TOC entry 3280 (class 2606 OID 32928)
+-- TOC entry 3283 (class 2606 OID 32928)
 -- Name: reports reports_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -838,7 +888,7 @@ ALTER TABLE ONLY public.reports
 
 
 --
--- TOC entry 3283 (class 2606 OID 32954)
+-- TOC entry 3286 (class 2606 OID 32954)
 -- Name: reviews reviews_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -847,7 +897,7 @@ ALTER TABLE ONLY public.reviews
 
 
 --
--- TOC entry 3277 (class 2606 OID 32911)
+-- TOC entry 3280 (class 2606 OID 32911)
 -- Name: templates templates_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -856,7 +906,7 @@ ALTER TABLE ONLY public.templates
 
 
 --
--- TOC entry 3257 (class 2606 OID 32793)
+-- TOC entry 3258 (class 2606 OID 32793)
 -- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -865,7 +915,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 3259 (class 2606 OID 32791)
+-- TOC entry 3260 (class 2606 OID 32791)
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -874,7 +924,16 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 3261 (class 2606 OID 32804)
+-- TOC entry 3262 (class 2606 OID 40971)
+-- Name: users users_username_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_username_key UNIQUE (username);
+
+
+--
+-- TOC entry 3264 (class 2606 OID 32804)
 -- Name: vessels vessels_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -883,7 +942,7 @@ ALTER TABLE ONLY public.vessels
 
 
 --
--- TOC entry 3263 (class 2606 OID 32806)
+-- TOC entry 3266 (class 2606 OID 32806)
 -- Name: vessels vessels_tag_no_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -892,7 +951,7 @@ ALTER TABLE ONLY public.vessels
 
 
 --
--- TOC entry 3264 (class 1259 OID 32981)
+-- TOC entry 3267 (class 1259 OID 32981)
 -- Name: idx_inspections_status; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -900,7 +959,7 @@ CREATE INDEX idx_inspections_status ON public.inspections USING btree (status);
 
 
 --
--- TOC entry 3265 (class 1259 OID 32980)
+-- TOC entry 3268 (class 1259 OID 32980)
 -- Name: idx_inspections_vessel_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -908,7 +967,7 @@ CREATE INDEX idx_inspections_vessel_id ON public.inspections USING btree (vessel
 
 
 --
--- TOC entry 3271 (class 1259 OID 32983)
+-- TOC entry 3274 (class 1259 OID 32983)
 -- Name: idx_observations_inspection_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -916,7 +975,7 @@ CREATE INDEX idx_observations_inspection_id ON public.observations USING btree (
 
 
 --
--- TOC entry 3268 (class 1259 OID 32982)
+-- TOC entry 3271 (class 1259 OID 32982)
 -- Name: idx_photos_inspection_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -924,7 +983,7 @@ CREATE INDEX idx_photos_inspection_id ON public.photos USING btree (inspection_i
 
 
 --
--- TOC entry 3278 (class 1259 OID 32984)
+-- TOC entry 3281 (class 1259 OID 32984)
 -- Name: idx_reports_inspection_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -932,7 +991,7 @@ CREATE INDEX idx_reports_inspection_id ON public.reports USING btree (inspection
 
 
 --
--- TOC entry 3281 (class 1259 OID 32985)
+-- TOC entry 3284 (class 1259 OID 32985)
 -- Name: idx_reviews_inspection_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -940,7 +999,15 @@ CREATE INDEX idx_reviews_inspection_id ON public.reviews USING btree (inspection
 
 
 --
--- TOC entry 3304 (class 2620 OID 32989)
+-- TOC entry 3256 (class 1259 OID 40972)
+-- Name: idx_users_username; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_users_username ON public.users USING btree (username);
+
+
+--
+-- TOC entry 3307 (class 2620 OID 32989)
 -- Name: inspections update_inspection_modtime; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -948,7 +1015,7 @@ CREATE TRIGGER update_inspection_modtime BEFORE UPDATE ON public.inspections FOR
 
 
 --
--- TOC entry 3305 (class 2620 OID 32990)
+-- TOC entry 3308 (class 2620 OID 32990)
 -- Name: observations update_observation_modtime; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -956,7 +1023,7 @@ CREATE TRIGGER update_observation_modtime BEFORE UPDATE ON public.observations F
 
 
 --
--- TOC entry 3302 (class 2620 OID 32987)
+-- TOC entry 3305 (class 2620 OID 32987)
 -- Name: users update_user_modtime; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -964,7 +1031,7 @@ CREATE TRIGGER update_user_modtime BEFORE UPDATE ON public.users FOR EACH ROW EX
 
 
 --
--- TOC entry 3303 (class 2620 OID 32988)
+-- TOC entry 3306 (class 2620 OID 32988)
 -- Name: vessels update_vessel_modtime; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -972,7 +1039,7 @@ CREATE TRIGGER update_vessel_modtime BEFORE UPDATE ON public.vessels FOR EACH RO
 
 
 --
--- TOC entry 3301 (class 2606 OID 32975)
+-- TOC entry 3304 (class 2606 OID 32975)
 -- Name: activity_logs activity_logs_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -981,7 +1048,7 @@ ALTER TABLE ONLY public.activity_logs
 
 
 --
--- TOC entry 3286 (class 2606 OID 32826)
+-- TOC entry 3289 (class 2606 OID 32826)
 -- Name: inspections inspections_inspector_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -990,7 +1057,7 @@ ALTER TABLE ONLY public.inspections
 
 
 --
--- TOC entry 3287 (class 2606 OID 32831)
+-- TOC entry 3290 (class 2606 OID 32831)
 -- Name: inspections inspections_reviewer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -999,7 +1066,7 @@ ALTER TABLE ONLY public.inspections
 
 
 --
--- TOC entry 3288 (class 2606 OID 32821)
+-- TOC entry 3291 (class 2606 OID 32821)
 -- Name: inspections inspections_vessel_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1008,7 +1075,7 @@ ALTER TABLE ONLY public.inspections
 
 
 --
--- TOC entry 3291 (class 2606 OID 32878)
+-- TOC entry 3294 (class 2606 OID 32878)
 -- Name: observations observations_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1017,7 +1084,7 @@ ALTER TABLE ONLY public.observations
 
 
 --
--- TOC entry 3292 (class 2606 OID 32868)
+-- TOC entry 3295 (class 2606 OID 32868)
 -- Name: observations observations_inspection_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1026,7 +1093,7 @@ ALTER TABLE ONLY public.observations
 
 
 --
--- TOC entry 3293 (class 2606 OID 32873)
+-- TOC entry 3296 (class 2606 OID 32873)
 -- Name: observations observations_photo_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1035,7 +1102,7 @@ ALTER TABLE ONLY public.observations
 
 
 --
--- TOC entry 3289 (class 2606 OID 32846)
+-- TOC entry 3292 (class 2606 OID 32846)
 -- Name: photos photos_inspection_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1044,7 +1111,7 @@ ALTER TABLE ONLY public.photos
 
 
 --
--- TOC entry 3290 (class 2606 OID 32851)
+-- TOC entry 3293 (class 2606 OID 32851)
 -- Name: photos photos_uploaded_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1053,7 +1120,7 @@ ALTER TABLE ONLY public.photos
 
 
 --
--- TOC entry 3294 (class 2606 OID 32895)
+-- TOC entry 3297 (class 2606 OID 32895)
 -- Name: presets presets_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1062,7 +1129,7 @@ ALTER TABLE ONLY public.presets
 
 
 --
--- TOC entry 3296 (class 2606 OID 32939)
+-- TOC entry 3299 (class 2606 OID 32939)
 -- Name: reports reports_generated_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1071,7 +1138,7 @@ ALTER TABLE ONLY public.reports
 
 
 --
--- TOC entry 3297 (class 2606 OID 32929)
+-- TOC entry 3300 (class 2606 OID 32929)
 -- Name: reports reports_inspection_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1080,7 +1147,7 @@ ALTER TABLE ONLY public.reports
 
 
 --
--- TOC entry 3298 (class 2606 OID 32934)
+-- TOC entry 3301 (class 2606 OID 32934)
 -- Name: reports reports_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1089,7 +1156,7 @@ ALTER TABLE ONLY public.reports
 
 
 --
--- TOC entry 3299 (class 2606 OID 32955)
+-- TOC entry 3302 (class 2606 OID 32955)
 -- Name: reviews reviews_inspection_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1098,7 +1165,7 @@ ALTER TABLE ONLY public.reviews
 
 
 --
--- TOC entry 3300 (class 2606 OID 32960)
+-- TOC entry 3303 (class 2606 OID 32960)
 -- Name: reviews reviews_reviewer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1107,7 +1174,7 @@ ALTER TABLE ONLY public.reviews
 
 
 --
--- TOC entry 3295 (class 2606 OID 32912)
+-- TOC entry 3298 (class 2606 OID 32912)
 -- Name: templates templates_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1115,7 +1182,7 @@ ALTER TABLE ONLY public.templates
     ADD CONSTRAINT templates_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(user_id);
 
 
--- Completed on 2025-11-02 15:53:14
+-- Completed on 2025-11-09 16:32:20
 
 --
 -- PostgreSQL database dump complete
